@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Walkthrough of waiting list functions</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Walkthrough of waiting list functions</h1>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(NHSRwaitinglist)</span></code></pre></div>
+<p>This vignette is a practical demonstration of the {NHSRwaitinglist}
+functions, using the same running example that is used in the reference
+white paper <a href="https://www.medrxiv.org/content/10.1101/2022.08.23.22279117v1.full-text">Fong
+el al.</a>, and <a href="https://www.youtube.com/watch?v=NWthhW5Fgls">video</a>.</p>
+<p>The example is centred on a P4 (priority 4) Ear, Nose &amp; Throat
+(ENT) waiting list at an acute hospital.</p>
+<p>The package functions we will be using are:</p>
+<table>
+<colgroup>
+<col width="26%" />
+<col width="73%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">Function</th>
+<th align="left">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right"><code>calc_queue_load()</code></td>
+<td align="left">To understand the ratio between demand and
+capacity.</td>
+</tr>
+<tr class="even">
+<td align="right"><code>calc_target_mean_wait()</code></td>
+<td align="left">To understand the average waiting time for a queue in
+equilibrium.</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>calc_target_queue_size()</code></td>
+<td align="left">To understand the queue size for a queue in
+equilibrium.</td>
+</tr>
+<tr class="even">
+<td align="right"><code>calc_relief_capacity()</code></td>
+<td align="left">To calculate the relief capacity needed to bring a very
+large queue under control.</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>calc_target_capacity()</code></td>
+<td align="left">To understand the capacity required to keep a queue in
+equilibrium, depending on how much variability it experiences.</td>
+</tr>
+<tr class="even">
+<td align="right"><code>calc_waiting_list_pressure()</code></td>
+<td align="left">A pressure measure, which can be used to compare
+multiple waiting lists for planning purposes.</td>
+</tr>
+</tbody>
+</table>
+<div id="setup" class="section level2">
+<h2>Setup</h2>
+<p>First, we’ll add the initial data we need, taken from the white
+paper.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Queue size (patients)</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>queue_size <span class="ot">&lt;-</span> <span class="dv">1200</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co"># Waiting time target (weeks)</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>waiting_time_target <span class="ot">&lt;-</span> <span class="dv">52</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co"># Average waiting time in the queue (weeks)</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>avg_waiting_time <span class="ot">&lt;-</span> <span class="dv">63</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co"># Proportion of waiting list who have missed the 52 week target (%)</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>perc_missing_target <span class="ot">&lt;-</span> <span class="fl">0.51</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co"># Demand (patients per week)</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>demand <span class="ot">&lt;-</span> <span class="dv">30</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co"># Capacity (procedures per week)</span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>capacity <span class="ot">&lt;-</span> <span class="dv">27</span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="co"># Standard deviation of number of operations per week</span></span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a>std_dev_procedures <span class="ot">&lt;-</span> <span class="dv">160</span></span></code></pre></div>
+</div>
+<div id="demand-capacity-and-load" class="section level2">
+<h2>Demand, capacity, and load</h2>
+<blockquote>
+<p>Fact 1: Capacity must be larger than demand, otherwise the waiting
+list size will grow indefinitely.</p>
+</blockquote>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>load <span class="ot">&lt;-</span> <span class="fu">calc_queue_load</span>(demand, capacity)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>load</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt; [1] 1.111111</span></span></code></pre></div>
+<p>We see that the load is 1.11, which is greater than 1. The queue will
+therefore grow in size indefinitely.</p>
+<blockquote>
+<p>Fact 2: If the load is greater than 1, then the queue is unstable,
+and the waiting list will grow indefinitely. If the load is less than 1,
+then the queue will be stable and the load is the proportion of the time
+that that waiting list is non-empty.</p>
+</blockquote>
+</div>
+<div id="waiting-list-targets" class="section level2">
+<h2>Waiting list targets</h2>
+<blockquote>
+<p>Fact 3: If the load on a queue is less than 1 then the chance of
+missing the target halves each time we increase the target by some fixed
+number of days.</p>
+</blockquote>
+<blockquote>
+<p>Fact 4: If we want to have a chance between 1.8%-0.2% of not
+achieving a waiting time target, then the average patient should have a
+waiting time between a quarter and a sixth of the target.</p>
+</blockquote>
+<p>In the case of a P4 waiting list, the target wait is 52 weeks. Thus,
+we should expect the average patient being operated on to have waited
+between 9 and 13 weeks. In the case of P2 customers, the target is 4
+weeks. Thus, the mean wait of a typical patient should be under one
+week.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>target_mean_wait <span class="ot">&lt;-</span> <span class="fu">calc_target_mean_wait</span>(waiting_time_target)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>target_mean_wait</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt; [1] 13</span></span></code></pre></div>
+<p>We see that the target mean wait is 13 weeks.</p>
+</div>
+<div id="target-queue-length" class="section level2">
+<h2>Target queue length</h2>
+<blockquote>
+<p>Fact 5: Little’s Law. Assuming capacity exceeds demand, the average
+queue size is demand multiplied by average waiting time.</p>
+</blockquote>
+<p>If, as given in Fact 4 above, we want the average waiting time to be
+a quarter of the target, then Little’s Law leads to fact 6.</p>
+</div>
+<div id="target-queue-size" class="section level2">
+<h2>Target queue size</h2>
+<blockquote>
+<p>Fact 6: Target queue size is demand multiplied by target wait,
+divided by 4.</p>
+</blockquote>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>target_queue_size <span class="ot">&lt;-</span> <span class="fu">calc_target_queue_size</span>(demand, waiting_time_target)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>target_queue_size</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt; [1] 390</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>queue_ratio <span class="ot">&lt;-</span> queue_size <span class="sc">/</span> target_queue_size</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>queue_ratio</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt; [1] 3.076923</span></span></code></pre></div>
+<p>In this example, the target queue size is 390, and the actual queue
+is 1200. The queue ratio is 3.1, meaning that the queue is 3.1 times its
+target size.</p>
+<p>If the waiting list size is over twice the target queue size, then we
+consider that special measures are needed to increase capacity, and
+reduce waiting list size.</p>
+</div>
+<div id="relief-capacity" class="section level2">
+<h2>Relief capacity</h2>
+<blockquote>
+<p>Fact 7: If the actual queue size is more than double the target queue
+size, then decide on a target date by which the queue will be brought
+down, and apply the necessary relief capacity.</p>
+</blockquote>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>weeks_until_target_acheived <span class="ot">&lt;-</span> <span class="dv">26</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>relief_capacity <span class="ot">&lt;-</span> <span class="fu">calc_relief_capacity</span>(</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>  <span class="at">demand =</span> demand,</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  <span class="at">queue_size =</span> queue_size,</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>  <span class="at">target_queue_size =</span> target_queue_size,</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>  <span class="at">time_to_target =</span> weeks_until_target_acheived</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>)</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>relief_capacity</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt; [1] 61.15385</span></span></code></pre></div>
+<p>In this example, we decide that the target should be achieved by the
+start of the summer, 26 weeks away. To do this, the capacity needed is
+61.2 procedures per week, compared to 27 procedures per week currently
+being performed.</p>
+</div>
+<div id="target-capacity" class="section level2">
+<h2>Target capacity</h2>
+<p>As discussed above if the queue size is more than double its target
+then capacity should be increased temporarily. However, once the queue
+size is within an acceptable range, we can maintain the waiting time
+target with what is potentially a much smaller capacity allocation to
+the waiting list.</p>
+<p>We know the mean waiting time (13 weeks) and queue size (390
+patients) of a waiting list operating at its target equilibrium. Now we
+calculate a capacity allocation that will maintain this equilibrium in
+the long run.</p>
+<blockquote>
+<p>Fact 8: Target capacity formula, based on the Pollaczek-Khinchine
+formula. The target capacity depends on demand, plus an additional
+capacity which is based on service variability, and the waiting time
+target.</p>
+</blockquote>
+<p>The parameter “F” depends on the variability of the service. If we do
+not know F, we can assume F = 1. Values less than 1 are good. Higher
+values represent more variability, which in turn will increase the
+capacity required to maintain equilibrium.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># set the &quot;F&quot; variability parameter</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>f_1 <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>target_capacity_1 <span class="ot">&lt;-</span> <span class="fu">calc_target_capacity</span>(</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  <span class="at">demand =</span> demand,</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>  <span class="at">target_wait =</span> waiting_time_target</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>)</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>target_capacity_1</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt; [1] 30.07692</span></span></code></pre></div>
+<p>If F is 1, we can see that the capacity required is 30.08, or 0.08
+more than the demand.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>f_2 <span class="ot">&lt;-</span> <span class="fl">6.58</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>target_capacity_2 <span class="ot">&lt;-</span> <span class="fu">calc_target_capacity</span>(</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="at">demand =</span> demand,</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="at">target_wait =</span> waiting_time_target</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>)</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>target_capacity_2</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; [1] 30.07692</span></span></code></pre></div>
+<p>If F is 6.58, we can see that the capacity required is 30.08, or 0.08
+more than the demand.</p>
+<p>So, decreasing variability of service (for example by stabilising
+operating theatre schedules from day to day and week to week) has the
+effect of reducing the capacity required to achieve a given service
+waiting standard.</p>
+<!--TODO add a calculation example for "F" here when the function is written-->
+</div>
+<div id="waiting-list-pressure" class="section level2">
+<h2>Waiting list pressure</h2>
+<blockquote>
+<p>Fact 9: Waiting list pressure. For a waiting list with target waiting
+time, the pressure on the waiting list is twice the mean waiting time
+divided by the target waiting time. The pressure of any given waiting
+list should be less than 1. If the pressure is greater than 1 then the
+waiting list is most likely going to miss its target.</p>
+</blockquote>
+<!--TODO check the 2x factor in this equation.  Pressure should be less than 1, but the examples omit the 2x factor.  Should pressure be less than 0.5, 1, or 2?-->
+<p>Measuring waiting list pressure can give a comparative measure with
+which to compare waiting lists, and help make resource allocation
+decisions.</p>
+<p>For the P4 ENT example we have been following:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>waiting_list_pressure_p4 <span class="ot">&lt;-</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>  <span class="fu">calc_waiting_list_pressure</span>(</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>    avg_waiting_time,</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>    waiting_time_target</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>  )</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>waiting_list_pressure_p4</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt; [1] 2.423077</span></span></code></pre></div>
+<p>The queue size is large, with 1200 patients waiting. The waiting time
+target is 52 weeks, and the average waiting time being experienced is 63
+weeks. This gives a waiting list pressure of 2.42. <strong>NOTE</strong>
+these numbers are slightly different to the <a href="https://www.medrxiv.org/content/10.1101/2022.08.23.22279117v1.full-text">white
+paper</a>, which changes the average waiting time from 63 weeks to 61
+weeks during the example.</p>
+<p>If we look at the P2 ENT example:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>queue_size_p2 <span class="ot">&lt;-</span> <span class="dv">220</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>avg_waiting_time_p2 <span class="ot">&lt;-</span> <span class="dv">24</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>waiting_time_target_p2 <span class="ot">&lt;-</span> <span class="dv">4</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>waiting_list_pressure_p2 <span class="ot">&lt;-</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>  <span class="fu">calc_waiting_list_pressure</span>(</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>    avg_waiting_time_p2,</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>    waiting_time_target_p2</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>  )</span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>waiting_list_pressure_p2</span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co">#&gt; [1] 12</span></span></code></pre></div>
+<p>The queue size is smaller, with 220 patients waiting. The waiting
+time target is 4 weeks, and the average waiting time being experienced
+is 24. This gives a waiting list pressure of 12.</p>
+<p>In these two examples the pressure on the much shorter P2 waiting
+list is 5 times higher than that on the P4 list. Closer attention should
+be paid to P2 procedures.</p>
+</div>
+<div id="summary" class="section level2">
+<h2>Summary</h2>
+<p>This worked example aims to demonstrate the functions available in
+this package. In chronological order of application they were:</p>
+<table>
+<colgroup>
+<col width="26%" />
+<col width="73%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="right">Function</th>
+<th align="left">Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="right"><code>calc_queue_load()</code></td>
+<td align="left">To understand the ratio between demand and
+capacity.</td>
+</tr>
+<tr class="even">
+<td align="right"><code>calc_target_mean_wait()</code></td>
+<td align="left">To understand the average waiting time for a queue in
+equilibrium.</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>calc_target_queue_size()</code></td>
+<td align="left">To understand the queue size for a queue in
+equilibrium.</td>
+</tr>
+<tr class="even">
+<td align="right"><code>calc_relief_capacity()</code></td>
+<td align="left">To calculate the relief capacity needed to bring a very
+large queue under control.</td>
+</tr>
+<tr class="odd">
+<td align="right"><code>calc_target_capacity()</code></td>
+<td align="left">To understand the capacity required to keep a queue in
+equilibrium, depending on how much variability it experiences.</td>
+</tr>
+<tr class="even">
+<td align="right"><code>calc_waiting_list_pressure()</code></td>
+<td align="left">A pressure measure, which can be used to compare
+multiple waiting lists for planning purposes.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div id="further-reading" class="section level2">
+<h2>Further reading</h2>
+<p>For examples of practical applications, and other considerations, see
+the helpful “Case Studies” section towards the end of the <a href="https://www.medrxiv.org/content/10.1101/2022.08.23.22279117v1.full-text">white
+paper</a>.</p>
+<p>END</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
