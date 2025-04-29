@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Exploring waiting list management strategies with simulation</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Exploring waiting list management
+strategies with simulation</h1>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(NHSRwaitinglist)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co"># set up a theme for our charts</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="fu">theme_set</span>(</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>    <span class="fu">theme</span>(</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>      <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(<span class="at">face =</span> <span class="st">&quot;italic&quot;</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>    )</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>)</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co"># Fix the random number seed for this vignette</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co"># Don&#39;t do this is real world application</span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span></code></pre></div>
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>When working with waiting lists, we may start with trying to
+understand current burdens, demand, capacity, load etc. If we have a
+planning dimension to our work, we may also want to ask ‘what if….’ or
+‘how long until…’ questions of our waiting list. Simulation, based on
+the properties of our waiting lists (or assumptions about how they will
+change), allows us to ask these questions and test out hypotheses.</p>
+<p>The following vignette acts as an example, where we are are modelling
+a waiting list for a UK NHS hospital for a surgical speciality. The
+process might have the flow such as:</p>
+<ul>
+<li>a patient presents to General Practice (GP)</li>
+<li>a GP refers the patient a hospital ‘outpatients’ clinic</li>
+<li>the clinician in the clinic lists the patient for surgery (entering
+the waiting list)</li>
+<li>Once the patient has receive their surgery, they leave the waiting
+list.</li>
+</ul>
+<p>We will consider this against an 18 week standard for waiting
+times.</p>
+<div id="scenarios" class="section level3">
+<h3>Scenarios</h3>
+<p>We will imagine three scenarios where we want to use simulation to
+project our waiting list into the future:</p>
+<ol style="list-style-type: decimal">
+<li>where we need to bring a high waiting list down into control</li>
+<li>where our waiting list can afford to grow (e.g. we want to constrain
+capacity, such as sub-contracted care at other organisations)</li>
+<li>how our list will change with referral growth and a service
+change</li>
+</ol>
+<p>The final example will demonstrate averaging over repeated
+simulation, and estimating uncertainty, using Monte Carlo methods.</p>
+<p><strong>Please remember that the examples here are simulations. They
+will vary due to chance each time they are run, and that is their
+strength. Do not expect to get exactly the same result when repeating;
+expect to get the same average results.</strong></p>
+</div>
+</div>
+<div id="set-up" class="section level1">
+<h1>Set-up</h1>
+<p><a href="#">Back to top…</a></p>
+<p>We will imagine a surgical treatment speciality at a UK NHS hospital.
+The NHS standard for this waiting list is to have 92% of patients seen
+and treated by 18 weeks.</p>
+<p>Using the <code>NHSRwaitinglist</code> package, we can calculate a
+few important statistics for different scenarios, starting required main
+waiting time to meet our target:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># What is the quantile value for target waiting list,</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co"># based on 92% of exponential distribution</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>qt92 <span class="ot">&lt;-</span> <span class="fu">qexp</span>(<span class="fl">0.92</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co"># Target mean wait for 18 weeks</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>target_mean_wait <span class="ot">&lt;-</span> <span class="fu">calc_target_mean_wait</span>(<span class="dv">18</span>, qt92)</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>target_mean_wait</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; [1] 7.126656</span></span></code></pre></div>
+<p>This makes our target average wait 7.13 weeks, and this average
+independent of any demand/capacity. The average wait must be this value,
+or less, to meet 92% at 18 weeks.</p>
+</div>
+<div id="bringing-down-a-waiting-list" class="section level1">
+<h1>1. Bringing down a waiting list</h1>
+<p><a href="#">Back to top…</a></p>
+<p>For our first scenario, we will assume the service received 100
+weekly referrals and has a weekly capacity of 80 appointments. We
+describe this balance between demand and capacity as the ‘Load’, which
+is the ratio between demand and capacity: 100/80= 1.25. If the Load is
+greater than 1, then the waiting list will grow, and if it is less than
+1 the waiting list will reduce.</p>
+<p>Let’s imagine our service is already running with a waiting list of
+840.</p>
+<p>For simulation purposes, we need to set up the current waiting list
+before we can run the simulation of the future state. There are few ways
+to set this up, including supplying a real waiting list,
+simulate/generate it using the properties of the list, or we can
+manually dump a load of open pathways into the start of the
+simulation.</p>
+<p>In the example below we simulate the current waiting list based on
+knowing that there are 840 on it, and 20 more referrals than removals
+per week (difference in demand and capacity): this means it will add 20
+to the waiting list each week. If we divide that 840 on the waiting list
+by 20, we get 42 weeks.</p>
+<p><strong>We therefore need to run the simulation for 42 weeks, with
+the stated demand and capacity, to generate a waiting list of
+840.</strong></p>
+<p><em>Remember that this is simulation, so it is stochastic. Any two
+runs will not be identical, but will lead to 840 on list on
+average.</em></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>end_date <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="st">&quot;2023-03-31&quot;</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co"># WL is 200, simulation is weekly, and capacity / demand difference is 20,</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co"># 20 added to WL each week. Therefore 420 / 20 = 21, 21 week difference for</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co"># sim start and end date:  7 x 21 = 147 days.</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co"># We take 1 day away too, to discount the end_date</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>start_date <span class="ot">&lt;-</span> end_date <span class="sc">-</span> (((<span class="dv">840</span> <span class="sc">/</span> <span class="dv">20</span>) <span class="sc">*</span> <span class="dv">7</span>) <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>current_wl1 <span class="ot">&lt;-</span> <span class="fu">wl_simulator</span>(<span class="at">start_date =</span> start_date,</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>                            <span class="at">end_date =</span> end_date,</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>                            <span class="at">demand =</span> <span class="dv">100</span>,</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>                            <span class="at">capacity =</span> <span class="dv">80</span>)</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="fu">tail</span>(<span class="fu">wl_queue_size</span>(current_wl1))</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt;          dates queue_size</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt; 289 2023-03-26        784</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt; 290 2023-03-27        784</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt; 291 2023-03-28        797</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt; 292 2023-03-29        803</span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt; 293 2023-03-30        804</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt; 294 2023-03-31        812</span></span></code></pre></div>
+<p>As an alternative, we could manually dump 840 open pathways into the
+current waiting list the day before our start date for the main
+simulation.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>current_wl1 <span class="ot">&lt;-</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>    <span class="at">Referral =</span> <span class="fu">rep</span>(<span class="fu">as.Date</span>(<span class="st">&quot;2023-03-31&quot;</span>), <span class="dv">840</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>    , <span class="at">Removal =</span> <span class="fu">rep</span>(<span class="fu">as.Date</span>(<span class="cn">NA</span>), <span class="dv">840</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>  )</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co"># Only a single day in our waiting list so we don&#39;t need `tail()` this time</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="fu">wl_queue_size</span>(current_wl1)</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt;        dates queue_size</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; 1 2023-03-31        840</span></span></code></pre></div>
+<div id="what-is-the-target-for-this-service" class="section level2">
+<h2>What is the target for this service?</h2>
+<p>If we are governing our resources well, we want to allow a
+sustainable queue as this allows patients to be flexibly scheduled
+whilst still meeting our targets. All capacity comes at a cost to the
+system, so we are seeking a balance between demand and capacity, with a
+sustainable waiting list where people are seen within a given target
+time.</p>
+<p>So our question is: what is the sustainable queue size for delivering
+92% at 18 weeks, given 100 weekly demand?</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>target_queue1 <span class="ot">&lt;-</span></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>  <span class="fu">calc_target_queue_size</span>(<span class="at">demand =</span> <span class="dv">100</span>, <span class="at">target_wait =</span> <span class="dv">18</span>, <span class="at">factor =</span> qt92)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>target_queue1</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt; [1] 712.6656</span></span></code></pre></div>
+<p>We have a target queue size of 712.67, and currently running a
+waiting list in excess of this, and load is &gt;1, so the list will keep
+growing, without intervention, and average wait times will get
+longer.</p>
+</div>
+<div id="options-for-management" class="section level2">
+<h2>Options for management</h2>
+<p>There are two ways to bring a waiting list like this down:</p>
+<ol style="list-style-type: decimal">
+<li>Raise the capacity (“more flowing out”)</li>
+<li>Reduce the demand (“fewer flowing in”)</li>
+</ol>
+<div id="raising-capacity" class="section level3">
+<h3>1. Raising capacity</h3>
+<p>Let’s imagine we are able to put an additional clinic in place that
+offers 25 more slots per week, taking our waiting list pressure down. We
+need to remember to include our waiting list into the simulation
+function, so it does not start from zero. We will run the simulation for
+one year then plot the waiting list.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>raised_capacity_wl <span class="ot">&lt;-</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>  <span class="fu">wl_simulator</span>(<span class="at">start_date =</span> <span class="fu">as.Date</span>(<span class="st">&quot;2023-04-01&quot;</span>),</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>               <span class="at">end_date =</span> <span class="fu">as.Date</span>(<span class="st">&quot;2024-03-31&quot;</span>),</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>               <span class="at">demand =</span> <span class="dv">100</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>               <span class="at">capacity =</span> <span class="dv">105</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>               <span class="at">waiting_list =</span> current_wl1)</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>raised_capacity_queue <span class="ot">&lt;-</span> <span class="fu">wl_queue_size</span>(raised_capacity_wl)</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="fu">tail</span>(raised_capacity_queue)</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt;          dates queue_size</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt; 362 2024-03-26        653</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt; 363 2024-03-27        649</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; 364 2024-03-28        645</span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt; 365 2024-03-29        639</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt; 366 2024-03-30        646</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt; 367 2024-03-31        659</span></span></code></pre></div>
+</div>
+<div id="reducing-demand" class="section level3">
+<h3>2. Reducing demand</h3>
+<p>Instead of raising capacity, let’s imagine we have put in new
+referral guidance that reduces the number of referrals coming in to the
+system, resulting in 5 fewer referrals per week. Again, we need to
+remember to include our waiting list into the simulation function, so it
+does not start from zero. We will run the simulation for one year then
+plot the waiting list.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>reduced_demand_wl <span class="ot">&lt;-</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>  <span class="fu">wl_simulator</span>(<span class="at">start_date =</span> <span class="fu">as.Date</span>(<span class="st">&quot;2023-04-01&quot;</span>),</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>               <span class="at">end_date =</span> <span class="fu">as.Date</span>(<span class="st">&quot;2024-03-31&quot;</span>),</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>               <span class="at">demand =</span> <span class="dv">77</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>               <span class="at">capacity =</span> <span class="dv">80</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>               <span class="at">waiting_list =</span> current_wl1)</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>reduced_demand_queue <span class="ot">&lt;-</span> <span class="fu">wl_queue_size</span>(reduced_demand_wl)</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="fu">tail</span>(reduced_demand_queue)</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt;          dates queue_size</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt; 362 2024-03-26        654</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; 363 2024-03-27        655</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt; 364 2024-03-28        653</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt; 365 2024-03-29        656</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co">#&gt; 366 2024-03-30        652</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="co">#&gt; 367 2024-03-31        661</span></span></code></pre></div>
+<p>To visualise this, we will plot the queue against time, marking the
+target queue size.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a>combine_queue <span class="ot">&lt;-</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="fu">rbind</span>(</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>    <span class="fu">cbind</span>(raised_capacity_queue, <span class="at">type =</span> <span class="st">&quot;raised capacity&quot;</span>),</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>    <span class="fu">cbind</span>(reduced_demand_queue, <span class="at">type =</span> <span class="st">&quot;reduced demand&quot;</span>)</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>  )</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="fu">ggplot</span>(combine_queue, <span class="fu">aes</span>(<span class="at">y =</span> queue_size, <span class="at">x =</span> dates)) <span class="sc">+</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">linetype =</span> type)) <span class="sc">+</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> target_queue1, <span class="at">colour =</span> <span class="st">&quot;#440154FF&quot;</span>) <span class="sc">+</span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">&quot;text&quot;</span>, <span class="at">label =</span> <span class="st">&quot;Target queue size&quot;</span>, <span class="at">x =</span> <span class="fu">as.Date</span>(<span class="st">&quot;2024-03-31&quot;</span>)</span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>           , <span class="at">y =</span> target_queue1, <span class="at">vjust =</span> <span class="fl">1.2</span></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>           , <span class="at">hjust =</span> <span class="fl">1.2</span>, <span class="at">colour =</span> <span class="st">&quot;#440154FF&quot;</span>) <span class="sc">+</span></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">&quot;Queue Size&quot;</span>, <span class="at">x =</span> <span class="st">&quot;Date&quot;</span></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a>       , <span class="at">title =</span> <span class="st">&quot;Simulated reduction in waiting list using demand or capacity&quot;</span>)</span></code></pre></div>
+<p>![](C:/Users/ChrisMainey(Birmingh/AppData/Local/Temp/RtmpWqneID/Rbuild66e41b4d2e44/NHSRwaitinglist/vignettes/waiting_list_sim_files/figure-html/plot_raise_capacity-1.png)<!-- -->
+The simulation above suggests that either maintaining the extra clinic
+until the end of the year (increased capacity) or reducing the referrals
+(reduced demand), would return the waiting list to just below the
+sustainable target.</p>
+</div>
+</div>
+</div>
+<div id="our-waiting-list-can-afford-to-grow" class="section level1">
+<h1>2. Our waiting list can afford to grow</h1>
+<p><a href="#">Back to top…</a></p>
+<p>On the surface, we might assume that growing a waiting list is always
+a bad thing. When dealing with a health economy, we must consider the <a href="https://en.wikipedia.org/wiki/Opportunity_cost">‘opportunity
+cost’</a>: what benefits we forgo by using our resources in one place
+rather than another. When applied to a large, complex health economy,
+this might mean we increase a waiting list, within an acceptable limit,
+in order to release resources/staff/funding to be used elsewhere. So our
+task here is to work out how large the waiting list can grow whilst
+still meeting target, setting a time period to do it over, then reducing
+capacity accordingly.</p>
+<p>In this scenario, we will consider a system with 50 referrals per
+week, 50 capacity per week, and a current waiting list of 82. We have a
+queue load of 1 so, baring natural fluctuation, we would not expect our
+queue to grow or reduce. We have the same target as in scenario 1.: 92%
+within 18 weeks. This means our target average waiting time would be
+7.13.</p>
+<p>Let’s first calculate our target queue length:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>target_queue2 <span class="ot">&lt;-</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>  <span class="fu">calc_target_queue_size</span>(<span class="at">demand =</span> <span class="dv">50</span>, <span class="at">target_wait =</span> <span class="dv">18</span>, <span class="at">factor =</span> qt92)</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>target_queue2</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt; [1] 356.3328</span></span></code></pre></div>
+<p>Our current waiting list is 82, with a target of: 356.33. This means
+we can afford to let our queue size increase by 274.33.</p>
+<p>If we are willing to let our waiting list grow over the next 6
+months, this equates to:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>current_queue <span class="ot">&lt;-</span> <span class="dv">82</span></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>queue_growth <span class="ot">&lt;-</span> target_queue2 <span class="sc">-</span> current_queue</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>weeks_to_grow <span class="ot">&lt;-</span> <span class="dv">26</span> <span class="co">#52 weeks per year / 2 for 6 months</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>queue_growth <span class="sc">/</span> weeks_to_grow</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">#&gt; [1] 10.55126</span></span></code></pre></div>
+<p>We can then assume a reduced capacity by 10.55 per week, and allow
+the queue to grow. In general, if this number is a decimal it is
+sensible to make the conservative rounding choice that leads to the
+lower queue growth. In this case it is to <code>floor()</code> the
+growth to 10.</p>
+<p>We can then verify this using simulation, following the steps in
+example 1.: set up the waiting list, simulate with our parameters, then
+plot:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>current_wl2 <span class="ot">&lt;-</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>  <span class="fu">data.frame</span>(</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>    <span class="at">Referral =</span> <span class="fu">rep</span>(<span class="fu">as.Date</span>(<span class="st">&quot;2024-03-31&quot;</span>), current_queue)</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>    , <span class="at">Removal =</span> <span class="fu">rep</span>(<span class="fu">as.Date</span>(<span class="cn">NA</span>), current_queue)</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>  )</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>raise_wl_sim <span class="ot">&lt;-</span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>  <span class="fu">wl_simulator</span>(<span class="at">start_date =</span> <span class="fu">as.Date</span>(<span class="st">&quot;2024-04-01&quot;</span>),</span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a>               <span class="at">end_date =</span> <span class="fu">as.Date</span>(<span class="st">&quot;2024-09-30&quot;</span>),</span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a>               <span class="at">demand =</span> <span class="dv">50</span>,</span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a>               <span class="at">capacity =</span>  (<span class="dv">50</span> <span class="sc">-</span> <span class="dv">10</span>), <span class="co"># 10 = floor(queue_growth / weeks_to_grow)</span></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a>               <span class="at">waiting_list =</span> current_wl2)</span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a></span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a>raised_wl <span class="ot">&lt;-</span> <span class="fu">wl_queue_size</span>(raise_wl_sim)</span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a></span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a><span class="fu">ggplot</span>(raised_wl, <span class="fu">aes</span>(<span class="at">y =</span> queue_size, <span class="at">x =</span> dates)) <span class="sc">+</span></span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> target_queue2, <span class="at">colour =</span> <span class="st">&quot;#21908CFF&quot;</span>) <span class="sc">+</span></span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">&quot;text&quot;</span>, <span class="at">label =</span> <span class="st">&quot;Target queue size&quot;</span>, <span class="at">x =</span> <span class="fu">as.Date</span>(<span class="st">&quot;2024-04-01&quot;</span>)</span>
+<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a>           , <span class="at">y =</span> target_queue2, <span class="at">vjust =</span> <span class="fl">1.2</span>, <span class="at">hjust =</span> <span class="dv">0</span>, <span class="at">colour =</span> <span class="st">&quot;#21908CFF&quot;</span>) <span class="sc">+</span></span>
+<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">&quot;Queue Size&quot;</span>, <span class="at">x =</span> <span class="st">&quot;Date&quot;</span></span>
+<span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a>       , <span class="at">title =</span> <span class="st">&quot;Simulated waiting list after allowing waiting list to grow&quot;</span>)</span></code></pre></div>
+<p>![](C:/Users/ChrisMainey(Birmingh/AppData/Local/Temp/RtmpWqneID/Rbuild66e41b4d2e44/NHSRwaitinglist/vignettes/waiting_list_sim_files/figure-html/example_2-1.png)<!-- --></p>
+</div>
+<div id="how-our-list-will-change-with-referral-growth-service-change" class="section level1">
+<h1>3. How our list will change with referral growth / service
+change</h1>
+<p>This is a more complicated example where we will make two assumptions
+over a 5-year modelling period:</p>
+<ol style="list-style-type: decimal">
+<li>Referrals will grow 5% per year</li>
+<li>In year 3, a service change will come into place that removes 20% of
+the referrals.</li>
+</ol>
+<p>To simulate this, we will need to set up our data inputs to reflect
+the assumptions. We will set up a scenario starting with 100 referrals
+per week, 100 capacity per week, and a waiting list of 500. We will do
+our range calculations for the sustainable list size, assuming a
+slightly different target from the first 2 examples: 95% should be seen
+within 18 weeks.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="co"># Target mean wait for 95% at 18 weeks</span></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>target_mean_wait3 <span class="ot">&lt;-</span> <span class="fu">calc_target_mean_wait</span>(<span class="dv">18</span>, <span class="fu">qexp</span>(<span class="fl">0.95</span>))</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>target_mean_wait3</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co">#&gt; [1] 6.008548</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>target_queue3 <span class="ot">&lt;-</span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>  <span class="fu">calc_target_queue_size</span>(<span class="at">demand =</span> <span class="dv">100</span>, <span class="at">target_wait =</span> <span class="dv">18</span>, <span class="at">factor =</span> <span class="fu">qexp</span>(<span class="fl">0.95</span>))</span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>target_queue3</span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co">#&gt; [1] 600.8548</span></span></code></pre></div>
+<p>In this case ours sustainable waiting list is 600.85, but this is
+only true at the start of the period. Given our growth and change
+assumptions, we need to construct a control table that maps these values
+out to power the simulation. This is worked out below in R, but users
+may find it easier to build in a spreadsheet application.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>ctrl_tbl <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>  <span class="at">start_date =</span> <span class="fu">as.Date</span>(<span class="fu">c</span>(<span class="st">&quot;2024-04-01&quot;</span>, <span class="st">&quot;2025-04-01&quot;</span>, <span class="st">&quot;2026-04-01&quot;</span></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>                         , <span class="st">&quot;2027-04-01&quot;</span>, <span class="st">&quot;2028-04-01&quot;</span>), <span class="at">format =</span> <span class="st">&quot;%Y-%m-%d&quot;</span>),</span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>  <span class="at">end_date =</span> <span class="fu">as.Date</span>(<span class="fu">c</span>(<span class="st">&quot;2025-03-31&quot;</span>, <span class="st">&quot;2026-03-31&quot;</span>, <span class="st">&quot;2027-03-31&quot;</span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>                       , <span class="st">&quot;2028-03-31&quot;</span>, <span class="st">&quot;2029-03-31&quot;</span>), <span class="at">format =</span> <span class="st">&quot;%Y-%m-%d&quot;</span>),</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>  <span class="at">demand =</span> <span class="dv">100</span>,</span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>  <span class="at">capacity =</span> <span class="dv">100</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>)</span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co"># Manually setting sim properties to illustrate:</span></span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>ctrl_tbl<span class="sc">$</span>demand[<span class="dv">2</span>] <span class="ot">&lt;-</span> ctrl_tbl<span class="sc">$</span>demand[<span class="dv">1</span>] <span class="sc">*</span> <span class="fl">1.05</span></span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a>ctrl_tbl<span class="sc">$</span>demand[<span class="dv">3</span>] <span class="ot">&lt;-</span> ctrl_tbl<span class="sc">$</span>demand[<span class="dv">2</span>] <span class="sc">*</span> <span class="fl">1.05</span> <span class="sc">*</span> <span class="fl">0.8</span> <span class="co"># 5% growth, 20% reduction</span></span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a>ctrl_tbl<span class="sc">$</span>demand[<span class="dv">4</span>] <span class="ot">&lt;-</span> ctrl_tbl<span class="sc">$</span>demand[<span class="dv">3</span>] <span class="sc">*</span> <span class="fl">1.05</span></span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a>ctrl_tbl<span class="sc">$</span>demand[<span class="dv">5</span>] <span class="ot">&lt;-</span> ctrl_tbl<span class="sc">$</span>demand[<span class="dv">4</span>] <span class="sc">*</span> <span class="fl">1.05</span></span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a></span>
+<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a>ctrl_tbl</span>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a><span class="co">#&gt;   start_date   end_date   demand capacity</span></span>
+<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a><span class="co">#&gt; 1 2024-04-01 2025-03-31 100.0000      100</span></span>
+<span id="cb13-19"><a href="#cb13-19" tabindex="-1"></a><span class="co">#&gt; 2 2025-04-01 2026-03-31 105.0000      100</span></span>
+<span id="cb13-20"><a href="#cb13-20" tabindex="-1"></a><span class="co">#&gt; 3 2026-04-01 2027-03-31  88.2000      100</span></span>
+<span id="cb13-21"><a href="#cb13-21" tabindex="-1"></a><span class="co">#&gt; 4 2027-04-01 2028-03-31  92.6100      100</span></span>
+<span id="cb13-22"><a href="#cb13-22" tabindex="-1"></a><span class="co">#&gt; 5 2028-04-01 2029-03-31  97.2405      100</span></span></code></pre></div>
+<p>We also need to update target queue size. We could do this by setting
+based on the current demand, the yearly demand or by the anticipated
+demand at the last period. Here, we will take the second approach, but
+this requires a calculation for each row.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>ctrl_tbl<span class="sc">$</span>target_queue_size <span class="ot">&lt;-</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>  <span class="fu">calc_target_queue_size</span>(<span class="at">demand =</span> ctrl_tbl<span class="sc">$</span>demand</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>                         , <span class="at">target_wait =</span> <span class="dv">18</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>                         , <span class="at">factor =</span> <span class="fu">qexp</span>(<span class="fl">0.95</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>current_wl3 <span class="ot">&lt;-</span></span>
+<span id="cb15-2"><a href="#cb15-2" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">Referral =</span> <span class="fu">rep</span>(<span class="fu">as.Date</span>(<span class="st">&quot;2024-03-31&quot;</span>), <span class="dv">500</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" tabindex="-1"></a>             , <span class="at">Removal =</span> <span class="fu">rep</span>(<span class="fu">as.Date</span>(<span class="cn">NA</span>), <span class="dv">500</span>))</span></code></pre></div>
+<p>We now need to run the simulation for each line of our control table.
+A handy way to capture this in <code>R</code> is to use a
+<code>list()</code>. First we will initialise a list of the right size
+to receive our output, as this is an efficient way to capture it. We can
+run the first line of the table through the simulation with the current
+waiting list:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a><span class="co"># Initialise a list of the same length as the table</span></span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a>sim3 <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="fu">NROW</span>(ctrl_tbl))</span>
+<span id="cb16-3"><a href="#cb16-3" tabindex="-1"></a></span>
+<span id="cb16-4"><a href="#cb16-4" tabindex="-1"></a><span class="co"># Run the first line and current waiting list</span></span>
+<span id="cb16-5"><a href="#cb16-5" tabindex="-1"></a>sim3[[<span class="dv">1</span>]] <span class="ot">&lt;-</span></span>
+<span id="cb16-6"><a href="#cb16-6" tabindex="-1"></a>  <span class="fu">wl_simulator</span>(<span class="at">start_date =</span> ctrl_tbl<span class="sc">$</span>start_date[<span class="dv">1</span>]</span>
+<span id="cb16-7"><a href="#cb16-7" tabindex="-1"></a>               , <span class="at">end_date =</span> ctrl_tbl<span class="sc">$</span>end_date[<span class="dv">1</span>]</span>
+<span id="cb16-8"><a href="#cb16-8" tabindex="-1"></a>               , <span class="at">demand =</span> ctrl_tbl<span class="sc">$</span>demand[<span class="dv">1</span>]</span>
+<span id="cb16-9"><a href="#cb16-9" tabindex="-1"></a>               , <span class="at">capacity =</span> ctrl_tbl<span class="sc">$</span>capacity[<span class="dv">1</span>]</span>
+<span id="cb16-10"><a href="#cb16-10" tabindex="-1"></a>               , <span class="at">waiting_list =</span> current_wl3)</span></code></pre></div>
+<p>We can now run through the rest of the table using a loop,
+referencing the last run as our waiting list e.g. during run 2, our
+waiting list is run 1, achieved by the <code>sim3[[i - 1]]</code>:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a><span class="co"># Loop through and simulate each section</span></span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="co"># Loop picks up each previous waiting list</span></span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="fu">seq</span>(<span class="dv">2</span>, <span class="dv">5</span>)) {</span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a>  sim3[[i]] <span class="ot">&lt;-</span></span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a>    <span class="fu">wl_simulator</span>(<span class="at">start_date =</span> ctrl_tbl<span class="sc">$</span>start_date[i]</span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a>                 , <span class="at">end_date =</span> ctrl_tbl<span class="sc">$</span>end_date[i]</span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a>                 , <span class="at">demand =</span> ctrl_tbl<span class="sc">$</span>demand[i]</span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a>                 , <span class="at">capacity =</span> ctrl_tbl<span class="sc">$</span>capacity[i]</span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a>                 , <span class="at">waiting_list =</span> sim3[[i <span class="sc">-</span> <span class="dv">1</span>]])</span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a>}</span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a></span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a>queue_over_time <span class="ot">&lt;-</span> <span class="fu">wl_queue_size</span>(sim3[[<span class="dv">5</span>]])</span></code></pre></div>
+<p>We can now plot and see what our list looks like. Key points to note
+are:</p>
+<ul>
+<li><p>The target queue size is calculated at each
+<code>start_date</code>, i.e. 1st April, and the way the lines are draw
+connects this points with a straight line.</p></li>
+<li><p>Depending on the variation in the simulation, the waiting list
+peaks above the sustainable target value in 2025/26, before the demand
+reduction pulls this list back down to a sustainable size.</p></li>
+<li><p>We have a case for releasing some capacity from late 2026
+onwards, as our list is of a sustainable size.</p></li>
+</ul>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="fu">ggplot</span>(queue_over_time, <span class="fu">aes</span>(<span class="at">y =</span> queue_size, <span class="at">x =</span> dates)) <span class="sc">+</span></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> target_queue_size, <span class="at">x =</span> start_date)</span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>            , <span class="at">colour =</span> <span class="st">&quot;#A69D75FF&quot;</span></span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a>            , <span class="at">data =</span></span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a>              <span class="fu">data.frame</span>(</span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a>                <span class="at">target_queue_size =</span></span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a>                <span class="fu">c</span>(ctrl_tbl<span class="sc">$</span>target_queue_size, ctrl_tbl<span class="sc">$</span>target_queue_size[<span class="dv">5</span>]),</span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a>                <span class="at">start_date =</span></span>
+<span id="cb18-10"><a href="#cb18-10" tabindex="-1"></a>                <span class="fu">c</span>(ctrl_tbl<span class="sc">$</span>start_date, ctrl_tbl<span class="sc">$</span>end_date[<span class="dv">5</span>])</span>
+<span id="cb18-11"><a href="#cb18-11" tabindex="-1"></a>              )) <span class="sc">+</span></span>
+<span id="cb18-12"><a href="#cb18-12" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">&quot;text&quot;</span>, <span class="at">label =</span> <span class="st">&quot;Target queue size&quot;</span>, <span class="at">x =</span> ctrl_tbl<span class="sc">$</span>start_date[<span class="dv">5</span>]</span>
+<span id="cb18-13"><a href="#cb18-13" tabindex="-1"></a>           , <span class="at">y =</span> ctrl_tbl<span class="sc">$</span>target_queue_size[<span class="dv">5</span>], <span class="at">vjust =</span> <span class="fl">1.2</span>, <span class="at">hjust =</span> <span class="fl">0.2</span></span>
+<span id="cb18-14"><a href="#cb18-14" tabindex="-1"></a>           , <span class="at">colour =</span> <span class="st">&quot;#A69D75FF&quot;</span>) <span class="sc">+</span></span>
+<span id="cb18-15"><a href="#cb18-15" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="fu">as.Date</span>(<span class="st">&quot;2026-04-01&quot;</span>), <span class="at">colour =</span> <span class="st">&quot;red&quot;</span>) <span class="sc">+</span></span>
+<span id="cb18-16"><a href="#cb18-16" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">&quot;text&quot;</span>, <span class="at">label =</span> <span class="st">&quot;20% demand</span><span class="sc">\n</span><span class="st">reduction&quot;</span>, <span class="at">x =</span> <span class="fu">as.Date</span>(<span class="st">&quot;2026-04-01&quot;</span>)</span>
+<span id="cb18-17"><a href="#cb18-17" tabindex="-1"></a>           , <span class="at">y =</span> <span class="dv">200</span>, <span class="at">hjust =</span> <span class="fl">1.1</span>, <span class="at">colour =</span> <span class="st">&quot;red&quot;</span>) <span class="sc">+</span></span>
+<span id="cb18-18"><a href="#cb18-18" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">&quot;Queue Size&quot;</span>, <span class="at">x =</span> <span class="st">&quot;Date&quot;</span></span>
+<span id="cb18-19"><a href="#cb18-19" tabindex="-1"></a>       , <span class="at">title =</span> <span class="st">&quot;Simulated waiting list, 5% year on year growth.&quot;</span></span>
+<span id="cb18-20"><a href="#cb18-20" tabindex="-1"></a>       , <span class="at">subtitle =</span> <span class="st">&quot;20% demand reduction from Apr-2026&quot;</span>)</span></code></pre></div>
+<p>![](C:/Users/ChrisMainey(Birmingh/AppData/Local/Temp/RtmpWqneID/Rbuild66e41b4d2e44/NHSRwaitinglist/vignettes/waiting_list_sim_files/figure-html/plot3-1.png)<!-- --></p>
+</div>
+<div id="estimating-uncertainty-via-monte-carlo-methods" class="section level1">
+<h1>4. Estimating uncertainty via Monte Carlo methods</h1>
+<p><a href="#">Back to top…</a></p>
+<p>The examples above have shown how we can simulate waiting lists, but
+each is a single simulation run based on random draws from a
+distribution. They change each time due to change, but in a predictable
+way. We can get an idea of the uncertainty around the methods above by
+using Monte Carlo methods: running them repeatedly and averaging over
+the values.</p>
+<p>Using example 1., we can repeatedly run it in several ways. This
+method wraps the simulation and the queue size functions in inside a
+function. This means that each run will return a data.frame of daily
+queue sizes.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>sim_func <span class="ot">&lt;-</span> <span class="cf">function</span>(run_id) {</span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a>  sim <span class="ot">&lt;-</span> <span class="fu">wl_simulator</span>(<span class="at">start_date =</span> <span class="fu">as.Date</span>(<span class="st">&quot;2023-04-01&quot;</span>),</span>
+<span id="cb19-3"><a href="#cb19-3" tabindex="-1"></a>                      <span class="at">end_date =</span> <span class="fu">as.Date</span>(<span class="st">&quot;2024-03-31&quot;</span>),</span>
+<span id="cb19-4"><a href="#cb19-4" tabindex="-1"></a>                      <span class="at">demand =</span> <span class="dv">100</span>,</span>
+<span id="cb19-5"><a href="#cb19-5" tabindex="-1"></a>                      <span class="at">capacity =</span> <span class="dv">105</span>,</span>
+<span id="cb19-6"><a href="#cb19-6" tabindex="-1"></a>                      <span class="at">waiting_list =</span> current_wl1)</span>
+<span id="cb19-7"><a href="#cb19-7" tabindex="-1"></a></span>
+<span id="cb19-8"><a href="#cb19-8" tabindex="-1"></a>  <span class="fu">cbind</span>(<span class="fu">wl_queue_size</span>(sim), run_id)</span>
+<span id="cb19-9"><a href="#cb19-9" tabindex="-1"></a>}</span>
+<span id="cb19-10"><a href="#cb19-10" tabindex="-1"></a></span>
+<span id="cb19-11"><a href="#cb19-11" tabindex="-1"></a><span class="co"># sequence to iterate over</span></span>
+<span id="cb19-12"><a href="#cb19-12" tabindex="-1"></a>run_sequence <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">50</span></span>
+<span id="cb19-13"><a href="#cb19-13" tabindex="-1"></a></span>
+<span id="cb19-14"><a href="#cb19-14" tabindex="-1"></a>raised_capacity_wl_mc <span class="ot">&lt;-</span> <span class="fu">lapply</span>(run_sequence, sim_func)</span></code></pre></div>
+<p>The replicate function above runs the simulation 50 times, and
+returns a list of the 50 replicates. In reality, we would run it many
+more times than this, but 50 keeps this vignette’s build time to a
+minimum and leads to wider more visible confidence interval in the chart
+below.</p>
+<p>We then need to take our output, reformat the list, and chose how we
+will average over the events. In the example below, I pull it into a
+single table then aggregate by average values per day. This will not
+always be the right approach, but it depends on your question. In this
+case, it helps give a more robust estimate of the average effects and
+allows us to put point-wise percentile range or confidence interval
+around them, using the daily means of the simulation. Alternatives might
+be to fit linear or non-linear models across the range and use the
+confidence intervals / bands from this approach, as demonstrated in <a href="https://cran.r-project.org/package=nlraa/vignettes/Confidence-Bands.html">this
+vignette</a> from the <code>nlraa</code> package.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a>mc_bind <span class="ot">&lt;-</span> <span class="fu">do.call</span>(<span class="st">&quot;rbind&quot;</span>, raised_capacity_wl_mc)</span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a>mc_agg <span class="ot">&lt;-</span></span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a>  <span class="fu">aggregate</span>(</span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a>    queue_size <span class="sc">~</span> dates</span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a>    , <span class="at">data =</span> mc_bind</span>
+<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a>    , <span class="at">FUN =</span> \(x) {</span>
+<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a>      <span class="fu">c</span>(<span class="at">mean_q =</span> <span class="fu">mean</span>(x),</span>
+<span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a>        <span class="at">median_q =</span> <span class="fu">median</span>(x),</span>
+<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a>        <span class="at">lower_95CI =</span> <span class="fu">mean</span>(x) <span class="sc">-</span>  (<span class="fl">1.96</span> <span class="sc">*</span> (<span class="fu">sd</span>(x) <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">length</span>(x)))),</span>
+<span id="cb20-10"><a href="#cb20-10" tabindex="-1"></a>        <span class="at">upper_95CI =</span> <span class="fu">mean</span>(x) <span class="sc">+</span>  (<span class="fl">1.96</span> <span class="sc">*</span> (<span class="fu">sd</span>(x) <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">length</span>(x)))),</span>
+<span id="cb20-11"><a href="#cb20-11" tabindex="-1"></a>        <span class="at">q_25 =</span> <span class="fu">quantile</span>(x, .<span class="dv">025</span>, <span class="at">names =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb20-12"><a href="#cb20-12" tabindex="-1"></a>        <span class="at">q_75 =</span> <span class="fu">quantile</span>(x, .<span class="dv">975</span>, <span class="at">names =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb20-13"><a href="#cb20-13" tabindex="-1"></a>    }</span>
+<span id="cb20-14"><a href="#cb20-14" tabindex="-1"></a>  )</span>
+<span id="cb20-15"><a href="#cb20-15" tabindex="-1"></a>mc_agg <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">dates =</span> <span class="fu">as.Date</span>(mc_agg<span class="sc">$</span>dates), <span class="fu">unlist</span>(mc_agg<span class="sc">$</span>queue_size))</span></code></pre></div>
+<p>We can now produce a similar plot to the one in section 1, but using
+the average value and 95% confidence interval.</p>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="fu">ggplot</span>(mc_bind, <span class="fu">aes</span>(<span class="at">x =</span> dates)) <span class="sc">+</span></span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> queue_size, <span class="at">group =</span> i), <span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">col =</span> <span class="st">&quot;grey&quot;</span>) <span class="sc">+</span></span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a>  <span class="fu">geom_ribbon</span>(<span class="fu">aes</span>(<span class="at">y =</span> mean_q, <span class="at">ymin =</span> lower_95CI, <span class="at">ymax =</span> upper_95CI)</span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a>              , <span class="at">alpha =</span> <span class="fl">0.5</span>, <span class="at">data =</span> mc_agg, <span class="at">fill =</span> <span class="st">&quot;red&quot;</span>) <span class="sc">+</span></span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> mean_q), <span class="at">data =</span> mc_agg, <span class="at">col =</span> <span class="st">&quot;black&quot;</span>) <span class="sc">+</span></span>
+<span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> target_queue1, <span class="at">colour =</span> <span class="st">&quot;#440154FF&quot;</span>) <span class="sc">+</span></span>
+<span id="cb21-7"><a href="#cb21-7" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">&quot;text&quot;</span>, <span class="at">label =</span> <span class="st">&quot;Target queue size&quot;</span>, <span class="at">x =</span> <span class="fu">as.Date</span>(<span class="st">&quot;2024-02-01&quot;</span>)</span>
+<span id="cb21-8"><a href="#cb21-8" tabindex="-1"></a>           , <span class="at">y =</span> target_queue1, <span class="at">vjust =</span> <span class="sc">-</span><span class="dv">1</span>, <span class="at">colour =</span> <span class="st">&quot;#440154FF&quot;</span>) <span class="sc">+</span></span>
+<span id="cb21-9"><a href="#cb21-9" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">&quot;Queue Size&quot;</span>, <span class="at">x =</span> <span class="st">&quot;Date&quot;</span></span>
+<span id="cb21-10"><a href="#cb21-10" tabindex="-1"></a>       , <span class="at">title =</span> <span class="st">&quot;Simulated waiting list after raising capacity&quot;</span></span>
+<span id="cb21-11"><a href="#cb21-11" tabindex="-1"></a>       , <span class="at">subtitle =</span> <span class="st">&quot;Average WL over 50 runs, with 95% confidence interval&quot;</span>)</span></code></pre></div>
+<p>![](C:/Users/ChrisMainey(Birmingh/AppData/Local/Temp/RtmpWqneID/Rbuild66e41b4d2e44/NHSRwaitinglist/vignettes/waiting_list_sim_files/figure-html/montecarlo_3-1.png)<!-- --></p>
+<p>The averaging has led to a straighter line for the trend and we have
+a range of uncertainty around the projection. Alternatively we could
+present the 25th - 75th percentile range.</p>
+<p>This type of Monte Carlo process can be applied to various situation
+by building your simulation into a function, repeatedly executing that
+function (which could be in parallel), collected the results calculating
+summary statistics.</p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

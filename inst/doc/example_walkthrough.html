@@ -534,21 +534,23 @@ capacity required to maintain equilibrium.</p>
 <span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a></span>
 <span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>target_capacity_1 <span class="ot">&lt;-</span> <span class="fu">calc_target_capacity</span>(</span>
 <span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>  <span class="at">demand =</span> demand,</span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>  <span class="at">target_wait =</span> waiting_time_target</span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>)</span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>target_capacity_1</span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt; [1] 30.07692</span></span></code></pre></div>
-<p>If F is 1, we can see that the capacity required is 30.08, or 0.08
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>  <span class="at">target_wait =</span> waiting_time_target,</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>  <span class="at">factor =</span> f_1</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>)</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>target_capacity_1</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt; [1] 30.01923</span></span></code></pre></div>
+<p>If F is 1, we can see that the capacity required is 30.02, or 0.02
 more than the demand.</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>f_2 <span class="ot">&lt;-</span> <span class="fl">6.58</span></span>
 <span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a></span>
 <span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>target_capacity_2 <span class="ot">&lt;-</span> <span class="fu">calc_target_capacity</span>(</span>
 <span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="at">demand =</span> demand,</span>
-<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="at">target_wait =</span> waiting_time_target</span>
-<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>)</span>
-<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>target_capacity_2</span>
-<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co">#&gt; [1] 30.07692</span></span></code></pre></div>
-<p>If F is 6.58, we can see that the capacity required is 30.08, or 0.08
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="at">target_wait =</span> waiting_time_target,</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>  <span class="at">factor =</span> f_2</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>)</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>target_capacity_2</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt; [1] 30.12654</span></span></code></pre></div>
+<p>If F is 6.58, we can see that the capacity required is 30.13, or 0.13
 more than the demand.</p>
 <p>So, decreasing variability of service (for example by stabilising
 operating theatre schedules from day to day and week to week) has the

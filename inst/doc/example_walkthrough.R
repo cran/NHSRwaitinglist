@@ -61,7 +61,8 @@ f_1 <- 1
 
 target_capacity_1 <- calc_target_capacity(
   demand = demand,
-  target_wait = waiting_time_target
+  target_wait = waiting_time_target,
+  factor = f_1
 )
 target_capacity_1
 
@@ -70,7 +71,8 @@ f_2 <- 6.58
 
 target_capacity_2 <- calc_target_capacity(
   demand = demand,
-  target_wait = waiting_time_target
+  target_wait = waiting_time_target,
+  factor = f_2
 )
 target_capacity_2
 
