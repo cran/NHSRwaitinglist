@@ -353,7 +353,7 @@ strategies with simulation</h1>
 <span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>)</span>
 <span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a></span>
 <span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co"># Fix the random number seed for this vignette</span></span>
-<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co"># Don&#39;t do this is real world application</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co"># Don&#39;t do this in real world application</span></span>
 <span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123</span>)</span></code></pre></div>
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
@@ -573,7 +573,7 @@ target queue size.</p>
 <span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>           , <span class="at">hjust =</span> <span class="fl">1.2</span>, <span class="at">colour =</span> <span class="st">&quot;#440154FF&quot;</span>) <span class="sc">+</span></span>
 <span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">&quot;Queue Size&quot;</span>, <span class="at">x =</span> <span class="st">&quot;Date&quot;</span></span>
 <span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a>       , <span class="at">title =</span> <span class="st">&quot;Simulated reduction in waiting list using demand or capacity&quot;</span>)</span></code></pre></div>
-<p>![](C:/Users/ChrisMainey(Birmingh/AppData/Local/Temp/RtmpWqneID/Rbuild66e41b4d2e44/NHSRwaitinglist/vignettes/waiting_list_sim_files/figure-html/plot_raise_capacity-1.png)<!-- -->
+<p>![](C:/Users/ChrisMainey(Birmingh/AppData/Local/Temp/RtmpYBoapF/Rbuild198449fb44a8/NHSRwaitinglist/vignettes/waiting_list_sim_files/figure-html/plot_raise_capacity-1.png)<!-- -->
 The simulation above suggests that either maintaining the extra clinic
 until the end of the year (increased capacity) or reducing the referrals
 (reduced demand), would return the waiting list to just below the
@@ -644,7 +644,7 @@ plot:</p>
 <span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a>           , <span class="at">y =</span> target_queue2, <span class="at">vjust =</span> <span class="fl">1.2</span>, <span class="at">hjust =</span> <span class="dv">0</span>, <span class="at">colour =</span> <span class="st">&quot;#21908CFF&quot;</span>) <span class="sc">+</span></span>
 <span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">&quot;Queue Size&quot;</span>, <span class="at">x =</span> <span class="st">&quot;Date&quot;</span></span>
 <span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a>       , <span class="at">title =</span> <span class="st">&quot;Simulated waiting list after allowing waiting list to grow&quot;</span>)</span></code></pre></div>
-<p>![](C:/Users/ChrisMainey(Birmingh/AppData/Local/Temp/RtmpWqneID/Rbuild66e41b4d2e44/NHSRwaitinglist/vignettes/waiting_list_sim_files/figure-html/example_2-1.png)<!-- --></p>
+<p>![](C:/Users/ChrisMainey(Birmingh/AppData/Local/Temp/RtmpYBoapF/Rbuild198449fb44a8/NHSRwaitinglist/vignettes/waiting_list_sim_files/figure-html/example_2-1.png)<!-- --></p>
 </div>
 <div id="how-our-list-will-change-with-referral-growth-service-change" class="section level1">
 <h1>3. How our list will change with referral growth / service
@@ -772,7 +772,7 @@ onwards, as our list is of a sustainable size.</p></li>
 <span id="cb18-18"><a href="#cb18-18" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">&quot;Queue Size&quot;</span>, <span class="at">x =</span> <span class="st">&quot;Date&quot;</span></span>
 <span id="cb18-19"><a href="#cb18-19" tabindex="-1"></a>       , <span class="at">title =</span> <span class="st">&quot;Simulated waiting list, 5% year on year growth.&quot;</span></span>
 <span id="cb18-20"><a href="#cb18-20" tabindex="-1"></a>       , <span class="at">subtitle =</span> <span class="st">&quot;20% demand reduction from Apr-2026&quot;</span>)</span></code></pre></div>
-<p>![](C:/Users/ChrisMainey(Birmingh/AppData/Local/Temp/RtmpWqneID/Rbuild66e41b4d2e44/NHSRwaitinglist/vignettes/waiting_list_sim_files/figure-html/plot3-1.png)<!-- --></p>
+<p>![](C:/Users/ChrisMainey(Birmingh/AppData/Local/Temp/RtmpYBoapF/Rbuild198449fb44a8/NHSRwaitinglist/vignettes/waiting_list_sim_files/figure-html/plot3-1.png)<!-- --></p>
 </div>
 <div id="estimating-uncertainty-via-monte-carlo-methods" class="section level1">
 <h1>4. Estimating uncertainty via Monte Carlo methods</h1>
@@ -844,7 +844,7 @@ the average value and 95% confidence interval.</p>
 <span id="cb21-9"><a href="#cb21-9" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">&quot;Queue Size&quot;</span>, <span class="at">x =</span> <span class="st">&quot;Date&quot;</span></span>
 <span id="cb21-10"><a href="#cb21-10" tabindex="-1"></a>       , <span class="at">title =</span> <span class="st">&quot;Simulated waiting list after raising capacity&quot;</span></span>
 <span id="cb21-11"><a href="#cb21-11" tabindex="-1"></a>       , <span class="at">subtitle =</span> <span class="st">&quot;Average WL over 50 runs, with 95% confidence interval&quot;</span>)</span></code></pre></div>
-<p>![](C:/Users/ChrisMainey(Birmingh/AppData/Local/Temp/RtmpWqneID/Rbuild66e41b4d2e44/NHSRwaitinglist/vignettes/waiting_list_sim_files/figure-html/montecarlo_3-1.png)<!-- --></p>
+<p>![](C:/Users/ChrisMainey(Birmingh/AppData/Local/Temp/RtmpYBoapF/Rbuild198449fb44a8/NHSRwaitinglist/vignettes/waiting_list_sim_files/figure-html/montecarlo_3-1.png)<!-- --></p>
 <p>The averaging has led to a straighter line for the trend and we have
 a range of uncertainty around the projection. Alternatively we could
 present the 25th - 75th percentile range.</p>

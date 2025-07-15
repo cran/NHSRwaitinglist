@@ -20,7 +20,7 @@ theme_set(
 )
 
 # Fix the random number seed for this vignette
-# Don't do this is real world application
+# Don't do this in real world application
 set.seed(123)
 
 ## ----overview-----------------------------------------------------------------

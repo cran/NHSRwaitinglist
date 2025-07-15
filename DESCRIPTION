@@ -1,6 +1,6 @@
 Package: NHSRwaitinglist
 Title: Waiting List Metrics Using Queuing Theory
-Version: 0.1.1
+Version: 0.1.2
 Authors@R: c(
           person("Neil", "Walton", ,"neil.walton@durham.ac.uk", "aut", comment = c(ORCID ="0000-0002-5241-9765")),
           person("Jacqueline", "Grout", ,"jacqueline.grout1@nhs.net", "ctb"),
@@ -24,23 +24,24 @@ URL: https://nhs-r-community.github.io/NHSRwaitinglist/,
         https://github.com/nhs-r-community/NHSRwaitinglist
 BugReports: https://github.com/nhs-r-community/NHSRwaitinglist/issues
 Config/testthat/edition: 3
-Imports: cli, dplyr, rlang, utils, stats, randomNames, methods
+Imports: cli, dplyr, rlang, utils, stats, randomNames
 Suggests: ggplot2, knitr, rmarkdown, testthat (>= 3.0.0)
-Depends: R (>= 3.5.0)
+Depends: R (>= 4.1.0)
 LazyData: true
 Language: en-GB
 NeedsCompilation: no
-Packaged: 2025-04-29 09:12:31 UTC; ChrisMainey(Birmingh
-Author: Neil Walton [aut] (<https://orcid.org/0000-0002-5241-9765>),
+Packaged: 2025-07-15 13:28:29 UTC; ChrisMainey(Birmingh
+Author: Neil Walton [aut] (ORCID: <https://orcid.org/0000-0002-5241-9765>),
   Jacqueline Grout [ctb],
-  Zoë Turner [ctb] (<https://orcid.org/0000-0003-1033-9158>),
+  Zoë Turner [ctb] (ORCID: <https://orcid.org/0000-0003-1033-9158>),
   Matt Dray [aut],
   Paul Fenton [ctb],
   Peter Shakeshaft [ctb],
   David Foord [ctb],
   Tom Smith [aut],
-  Chris Mainey [cre, aut] (<https://orcid.org/0000-0002-3018-6171>),
+  Chris Mainey [cre, aut] (ORCID:
+    <https://orcid.org/0000-0002-3018-6171>),
   Mohammed Mohammed [ctb],
   NHS-R community [cph]
 Repository: CRAN
-Date/Publication: 2025-04-29 09:30:02 UTC
+Date/Publication: 2025-07-15 15:50:02 UTC

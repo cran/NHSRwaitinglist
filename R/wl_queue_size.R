@@ -4,8 +4,10 @@
 
 #'
 #' @param waiting_list data.frame consisting addition and removal dates
-#' @param start_date start of calculation period
-#' @param end_date end of calculation period
+#' @param start_date Date or character (in format 'YYYY-MM-DD'); start of
+#'   calculation period
+#' @param end_date Date or character (in format 'YYYY-MM-DD'); end of
+#'   calculation period
 #' @param referral_index the index of referrals in waiting_list
 #' @param removal_index the index of removals in waiting_list
 #'
@@ -32,14 +34,8 @@ wl_queue_size <- function(waiting_list,
                           end_date = NULL,
                           referral_index = 1,
                           removal_index = 2) {
-
-  if (missing(waiting_list)) {
-    stop("No waiting list supplied")
-  } else {
-    if (nrow(waiting_list) == 0) {
-      stop("No rows in supplied waiting list")
-    }
-  }
+  check_wl(waiting_list, referral_index, removal_index)
+  check_date(start_date, end_date, .allow_null = TRUE)
 
   wl <- waiting_list
 
@@ -52,6 +48,7 @@ wl_queue_size <- function(waiting_list,
 
   wl[wl[, referral_index] < start_date, referral_index] <- start_date
   arrival_counts <- data.frame(table(wl[, referral_index]))
+  arrival_counts[, 1] <- as.Date(arrival_counts[, 1])
 
   dates <- seq(as.Date(start_date), as.Date(end_date), by = "day")
   queues <- data.frame(dates, rep(0, length(dates)))
@@ -68,6 +65,8 @@ wl_queue_size <- function(waiting_list,
         table(wl[which((start_date <= wl[, removal_index]) &
                          (wl[, removal_index] <= end_date)), removal_index])
       )
+
+    departure_counts[, 1] <- as.Date(departure_counts[, 1])
 
     queues$departures <- rep(0, length(dates))
     queues[which(queues[, 1] %in% departure_counts[, 1]), 4] <-
